@@ -43,6 +43,20 @@ def run_infinite_post_data_loop():
                 pin_data = dict(row._mapping)
                 print(pin_data)
             
+            geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
+            geo_selected_row = connection.execute(geo_string)
+            
+            for row in geo_selected_row:
+                geo_result = dict(row._mapping)
+                print(geo_result)
+
+            user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
+            user_selected_row = connection.execute(user_string)
+            
+            for row in user_selected_row:
+                user_result = dict(row._mapping)
+                print(user_result)
+            
 if __name__ == "__main__":
     run_infinite_post_data_loop()
     print('Working')
