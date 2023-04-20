@@ -20,4 +20,23 @@ ps.sql('''
 
 # COMMAND ----------
 
+ps.sql('''
+  WITH cte1 AS
+  (SELECT 
+      YEAR(geo.timestamp) AS post_year,
+      pin.category
+  FROM {geo_df} geo INNER JOIN {pin_df} pin
+  ON geo.ind = pin.ind)
+  
+  SELECT 
+      *,
+      COUNT(category) AS category_count
+  FROM cte1
+  WHERE post_year BETWEEN 2018 AND 2022
+  GROUP BY category, post_year
+  ORDER BY category ASC, post_year ASC
+''')
+
+# COMMAND ----------
+
 
