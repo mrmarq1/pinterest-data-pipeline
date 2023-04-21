@@ -159,4 +159,37 @@ ps.sql('''
 
 # COMMAND ----------
 
+ps.sql('''      
+      WITH 
+      cte1 AS
+      (SELECT 
+          YEAR(g.timestamp) AS post_year,
+          p.follower_count
+      FROM {geo_df} g INNER JOIN {pin_df} p
+      ON g.ind = p.ind
+      WHERE YEAR(g.timestamp) BETWEEN 2015 AND 2020
+      ORDER BY post_year),
+      cte2 AS 
+      (SELECT
+          *,
+          ROW_NUMBER() OVER(PARTITION BY post_year ORDER BY follower_count) AS row_no      
+      FROM cte1
+      ORDER BY post_year
+      ),
+      cte3 AS
+      (SELECT
+        *,
+        MAX(row_no) OVER(PARTITION BY post_year) AS max_row_no
+      FROM cte2)
+
+      SELECT
+        post_year, 
+        follower_count AS median_follower_count
+      FROM cte3
+      WHERE row_no = ROUND(max_row_no/2)
+      ORDER BY post_year
+''')
+
+# COMMAND ----------
+
 
