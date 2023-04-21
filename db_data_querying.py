@@ -147,4 +147,17 @@ ps.sql('''
 
 # COMMAND ----------
 
+ps.sql('''      
+      SELECT 
+          YEAR(g.timestamp) AS post_year,
+          COUNT(YEAR(u.date_joined)) AS number_users_joined
+      FROM {geo_df} g INNER JOIN {user_df} u
+      ON g.ind = u.ind
+      GROUP BY post_year
+      HAVING post_year BETWEEN 2015 AND 2020
+      ORDER BY post_year
+''')
+
+# COMMAND ----------
+
 
