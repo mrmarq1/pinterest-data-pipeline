@@ -39,4 +39,42 @@ ps.sql('''
 
 # COMMAND ----------
 
+follower_count_table = ps.sql('''
+      WITH cte1 AS 
+      (SELECT 
+          country, 
+          poster_name, 
+          follower_count,
+          RANK() OVER (PARTITION BY country ORDER BY follower_count DESC) as rank
+      FROM {pin_df} pin INNER JOIN {geo_df} geo
+      ON pin.ind = geo.ind
+      GROUP BY poster_name, country, follower_count
+      ORDER BY country),
+      cte2 AS     
+      (SELECT
+          country, 
+          poster_name, 
+          follower_count
+      FROM cte1
+      WHERE rank = 1)
+      
+      SELECT 
+          *
+      FROM cte2
+''')
+
+display(follower_count_table)
+
+# COMMAND ----------
+
+ps.sql('''      
+      SELECT 
+          country,
+          follower_count
+      FROM {follower_count_table}
+      WHERE follower_count = (SELECT MAX(follower_count) FROM {follower_count_table})
+''')
+
+# COMMAND ----------
+
 
