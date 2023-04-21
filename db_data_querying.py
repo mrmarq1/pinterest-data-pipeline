@@ -109,4 +109,42 @@ ps.sql('''
 
 # COMMAND ----------
 
+ps.sql('''      
+      WITH 
+      cte1 AS
+      (SELECT 
+          (CASE
+            WHEN u.age BETWEEN 18 AND 24 THEN '18-24'
+            WHEN u.age BETWEEN 25 AND 35 THEN '25-35'
+            WHEN u.age BETWEEN 36 AND 50 THEN '36-50'
+            WHEN u.age > 50 THEN '50+'
+          END) AS age_group,
+          p.follower_count
+      FROM {user_df} u INNER JOIN {pin_df} p
+      ON u.ind = p.ind
+      ORDER BY age_group),
+      cte2 AS 
+      (SELECT
+          *,
+          ROW_NUMBER() OVER(PARTITION BY age_group ORDER BY follower_count) AS row_no      
+      FROM cte1
+      ),
+      cte3 AS 
+      (
+      SELECT 
+        age_group,
+        SUM(follower_count) AS sum_of_follower_counts,
+        MAX(row_no) AS num_of_follower_counts
+      FROM cte2
+      GROUP BY age_group
+      )
+
+      SELECT
+        age_group,
+        ROUND(sum_of_follower_counts / num_of_follower_counts) AS median_follower_count
+      FROM cte3
+''')
+
+# COMMAND ----------
+
 
