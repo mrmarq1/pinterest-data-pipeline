@@ -128,21 +128,20 @@ ps.sql('''
           *,
           ROW_NUMBER() OVER(PARTITION BY age_group ORDER BY follower_count) AS row_no      
       FROM cte1
+      ORDER BY age_group
       ),
-      cte3 AS 
-      (
-      SELECT 
-        age_group,
-        SUM(follower_count) AS sum_of_follower_counts,
-        MAX(row_no) AS num_of_follower_counts
-      FROM cte2
-      GROUP BY age_group
-      )
+      cte3 AS
+      (SELECT
+        *,
+        MAX(row_no) OVER(PARTITION BY age_group) AS max_row_no
+      FROM cte2)
 
       SELECT
-        age_group,
-        ROUND(sum_of_follower_counts / num_of_follower_counts) AS median_follower_count
+        age_group, 
+        follower_count AS median_follower_count
       FROM cte3
+      WHERE row_no = ROUND(max_row_no/2)
+      ORDER BY age_group
 ''')
 
 # COMMAND ----------
