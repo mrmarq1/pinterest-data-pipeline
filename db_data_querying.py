@@ -77,4 +77,36 @@ ps.sql('''
 
 # COMMAND ----------
 
+ps.sql('''      
+      WITH cte1 AS
+      (SELECT 
+          (CASE
+            WHEN u.age BETWEEN 18 AND 24 THEN '18-24'
+            WHEN u.age BETWEEN 25 AND 35 THEN '25-35'
+            WHEN u.age BETWEEN 36 AND 50 THEN '36-50'
+            WHEN u.age > 50 THEN '50+'
+          END) AS age_group,
+          p.category,
+          COUNT(p.category) AS category_count      
+      FROM {user_df} u INNER JOIN {pin_df} p
+      ON u.ind = p.ind
+      GROUP BY age_group, p.category
+      ORDER BY age_group),
+      cte2 AS 
+      (SELECT
+          *,
+          RANK(category_count) OVER(PARTITION BY age_group ORDER BY category_count DESC) AS category_count_rank
+      FROM cte1
+      )
+
+      SELECT
+        age_group,
+        category,
+        category_count
+      FROM cte2
+      WHERE category_count_rank = 1
+''')
+
+# COMMAND ----------
+
 
