@@ -6,7 +6,7 @@ dbutils.fs.ls('/FileStore/tables/authentication_credentials.csv')
 from pyspark.sql.functions import *
 import urllib
 import pyspark.pandas as ps
-from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, FloatType, TimestampType
 
 file_type = 'csv'
 first_row_is_header = 'true'
@@ -36,7 +36,13 @@ def get_data_by_topic(topic_ext):
                 .option('inferSchema', 'true') \
                 .load()
 
-    schema = StructType([
+    return kinesis_df
+
+dfs = {topic_ext: get_data_by_topic(topic_ext) for topic_ext in ('pin', 'geo', 'user')}
+
+# COMMAND ----------
+
+schema = StructType([
             StructField('index', IntegerType()),
             StructField('unique_id', StringType()),
             StructField('title', StringType()),
@@ -49,64 +55,77 @@ def get_data_by_topic(topic_ext):
             StructField('downloaded', IntegerType()),
             StructField('save_location', StringType()),
             StructField('category', StringType())
-            ])
+        ])
 
-    pyspark_df = kinesis_data[topic_ext] \
-                .selectExpr('CAST(data AS STRING)') \
-                .select(from_json('data', schema).alias('data')) \
-                .select('data.*')
-
-    return pyspark_df
-
-
-dfs = {topic_ext: get_data_by_topic(topic_ext) for topic_ext in ('pin', 'geo', 'user')}
-display(dfs['pin'])
+pin_df = dfs['pin'] \
+        .selectExpr('CAST(data AS STRING)') \
+        .select(from_json('data', schema).alias('data')) \
+        .select('data.*')
 
 # COMMAND ----------
 
 from pyspark.sql.functions import when
 
-dfs['pin'] = dfs['pin'].withColumn('description', 
-    when(dfs['pin'].description.contains('No description available'),regexp_replace(dfs['pin'].description,'No description available','None')) \
-   .when(dfs['pin'].description.contains('No description available Story format'),regexp_replace(dfs['pin'].description,'No description available Story format','None')) \
-   .when(dfs['pin'].description.contains('Untitled'),regexp_replace(dfs['pin'].description,'Untitled','None'))\
-   .otherwise(dfs['pin'].description))
+pin_df = pin_df.withColumn('description', 
+    when(pin_df.description.contains('No description available'),regexp_replace(pin_df.description,'No description available','None')) \
+   .when(pin_df.description.contains('No description available Story format'),regexp_replace(pin_df.description,'No description available Story format','None')) \
+   .when(pin_df.description.contains('Untitled'),regexp_replace(pin_df.description,'Untitled','None'))\
+   .otherwise(pin_df.description))
 
-dfs['pin'] = dfs['pin'].withColumn('follower_count', 
-    when(dfs['pin'].follower_count.contains('User Info Error'),regexp_replace(dfs['pin'].follower_count,'User Info Error','None')) \
-   .when(dfs['pin'].follower_count.contains('k'),regexp_replace(dfs['pin'].follower_count,'k','000')) \
-   .otherwise(dfs['pin'].follower_count))
+pin_df = pin_df.withColumn('follower_count', 
+    when(pin_df.follower_count.contains('User Info Error'),regexp_replace(pin_df.follower_count,'User Info Error','None')) \
+   .when(pin_df.follower_count.contains('k'),regexp_replace(pin_df.follower_count,'k','000')) \
+   .otherwise(pin_df.follower_count))
 
-dfs['pin'] = dfs['pin'].withColumn('follower_count', dfs['pin'].follower_count.cast('int'))
+pin_df = pin_df.withColumn('follower_count', pin_df.follower_count.cast('int'))
 
-dfs['pin'] = dfs['pin'].withColumn('image_src', 
-    when(dfs['pin'].image_src.contains('Image src error.'),regexp_replace(dfs['pin'].image_src,'Image src error.', 'None')) \
-    .otherwise(dfs['pin'].image_src))
+pin_df = pin_df.withColumn('image_src', 
+    when(pin_df.image_src.contains('Image src error.'),regexp_replace(pin_df.image_src,'Image src error.', 'None')) \
+    .otherwise(pin_df.image_src))
 
-dfs['pin'] = dfs['pin'].withColumnRenamed('index', 'ind')
+pin_df = pin_df.withColumnRenamed('index', 'ind')
 
-dfs['pin'] = dfs['pin'].withColumn('poster_name', 
-    when(dfs['pin'].poster_name.contains('User Info Error.'), regexp_replace(dfs['pin'].poster_name,'User Info Error.', 'None')) \
-    .otherwise(dfs['pin'].poster_name))
+pin_df = pin_df.withColumn('poster_name', 
+    when(pin_df.poster_name.contains('User Info Error.'), regexp_replace(pin_df.poster_name,'User Info Error.', 'None')) \
+    .otherwise(pin_df.poster_name))
 
-dfs['pin'] = dfs['pin'].withColumn('save_location', 
-    when(dfs['pin'].save_location.contains('Local save in'), regexp_replace(dfs['pin'].save_location,'Local save in','')) \
-    .otherwise(dfs['pin'].poster_name))
+pin_df = pin_df.withColumn('save_location', 
+    when(pin_df.save_location.contains('Local save in'), regexp_replace(pin_df.save_location,'Local save in','')) \
+    .otherwise(pin_df.poster_name))
 
-dfs['pin'] = dfs['pin'].withColumn('tag_list', 
-    when(dfs['pin'].tag_list.contains('N,o, ,T,a,g,s, ,A,v,a,i,l,a,b,l,e'), regexp_replace(dfs['pin'].tag_list,'N,o, ,T,a,g,s, ,A,v,a,i,l,a,b,l,e','None')) \
-    .otherwise(dfs['pin'].tag_list))
+pin_df = pin_df.withColumn('tag_list', 
+    when(pin_df.tag_list.contains('N,o, ,T,a,g,s, ,A,v,a,i,l,a,b,l,e'), regexp_replace(pin_df.tag_list,'N,o, ,T,a,g,s, ,A,v,a,i,l,a,b,l,e','None')) \
+    .otherwise(pin_df.tag_list))
 
-dfs['pin'] = dfs['pin'].withColumn('title', 
-    when(dfs['pin'].title.contains('No Title Data Available'), regexp_replace(dfs['pin'].title,'No Title Data Available','None')) \
-    .otherwise(dfs['pin'].title))
+pin_df = pin_df.withColumn('title', 
+    when(pin_df.title.contains('No Title Data Available'), regexp_replace(pin_df.title,'No Title Data Available','None')) \
+    .otherwise(pin_df.title))
 
-pin_df = dfs['pin'].select('ind', 'unique_id', 'title', 'description', 'follower_count', 'poster_name', 'tag_list', 'is_image_or_video', 'image_src', 'save_location', 'category')
+pin_df = pin_df.select('ind', 'unique_id', 'title', 'description', 'follower_count', 'poster_name', 'tag_list', 'is_image_or_video', 'image_src', 'save_location', 'category')
 
 
 # COMMAND ----------
 
 display(pin_df)
+
+# COMMAND ----------
+
+schema = StructType([
+            StructField('country', StringType()),
+            StructField('ind', IntegerType()),
+            StructField('latitude', FloatType()),
+            StructField('longitude', FloatType()),
+            StructField('timestamp', TimestampType())
+        ])
+
+geo_df = dfs['geo'] \
+        .selectExpr('CAST(data AS STRING)') \
+        .select(from_json('data', schema).alias('data')) \
+        .select('data.*')
+
+# COMMAND ----------
+
+display(geo_df)
 
 # COMMAND ----------
 
