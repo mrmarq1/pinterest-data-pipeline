@@ -66,13 +66,42 @@ display(dfs['pin'])
 
 from pyspark.sql.functions import when
 
-# Convert all instances of missing 'description' data into 'None'
-
-pin_df = dfs['pin'].withColumn('description', 
+dfs['pin'] = dfs['pin'].withColumn('description', 
     when(dfs['pin'].description.contains('No description available'),regexp_replace(dfs['pin'].description,'No description available','None')) \
    .when(dfs['pin'].description.contains('No description available Story format'),regexp_replace(dfs['pin'].description,'No description available Story format','None')) \
    .when(dfs['pin'].description.contains('Untitled'),regexp_replace(dfs['pin'].description,'Untitled','None'))\
    .otherwise(dfs['pin'].description))
+
+dfs['pin'] = dfs['pin'].withColumn('follower_count', 
+    when(dfs['pin'].follower_count.contains('User Info Error'),regexp_replace(dfs['pin'].follower_count,'User Info Error','None')) \
+   .when(dfs['pin'].follower_count.contains('k'),regexp_replace(dfs['pin'].follower_count,'k','000')) \
+   .otherwise(dfs['pin'].follower_count))
+
+dfs['pin'] = dfs['pin'].withColumn('follower_count', dfs['pin'].follower_count.cast('int'))
+
+dfs['pin'] = dfs['pin'].withColumn('image_src', 
+    when(dfs['pin'].image_src.contains('Image src error.'),regexp_replace(dfs['pin'].image_src,'Image src error.', 'None')) \
+    .otherwise(dfs['pin'].image_src))
+
+dfs['pin'] = dfs['pin'].withColumnRenamed('index', 'ind')
+
+dfs['pin'] = dfs['pin'].withColumn('poster_name', 
+    when(dfs['pin'].poster_name.contains('User Info Error.'), regexp_replace(dfs['pin'].poster_name,'User Info Error.', 'None')) \
+    .otherwise(dfs['pin'].poster_name))
+
+dfs['pin'] = dfs['pin'].withColumn('save_location', 
+    when(dfs['pin'].save_location.contains('Local save in'), regexp_replace(dfs['pin'].save_location,'Local save in','')) \
+    .otherwise(dfs['pin'].poster_name))
+
+dfs['pin'] = dfs['pin'].withColumn('tag_list', 
+    when(dfs['pin'].tag_list.contains('N,o, ,T,a,g,s, ,A,v,a,i,l,a,b,l,e'), regexp_replace(dfs['pin'].tag_list,'N,o, ,T,a,g,s, ,A,v,a,i,l,a,b,l,e','None')) \
+    .otherwise(dfs['pin'].tag_list))
+
+dfs['pin'] = dfs['pin'].withColumn('title', 
+    when(dfs['pin'].title.contains('No Title Data Available'), regexp_replace(dfs['pin'].title,'No Title Data Available','None')) \
+    .otherwise(dfs['pin'].title))
+
+pin_df = dfs['pin'].select('ind', 'unique_id', 'title', 'description', 'follower_count', 'poster_name', 'tag_list', 'is_image_or_video', 'image_src', 'save_location', 'category')
 
 
 # COMMAND ----------
