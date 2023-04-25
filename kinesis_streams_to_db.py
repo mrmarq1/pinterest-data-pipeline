@@ -134,4 +134,24 @@ display(geo_df)
 
 # COMMAND ----------
 
+schema = StructType([
+            StructField('age', IntegerType()),
+            StructField('date_joined', TimestampType()),
+            StructField('first_name', StringType()),
+            StructField('ind', IntegerType()),
+            StructField('last_name', StringType())
+        ])
 
+user_df = dfs['user'] \
+        .selectExpr('CAST(data AS STRING)') \
+        .select(from_json('data', schema).alias('data')) \
+        .select('data.*')
+
+# COMMAND ----------
+
+user_df = user_df.select('ind', concat_ws(' ', user_df.first_name, user_df.last_name).alias('user_name'), 'age', 'date_joined')
+
+
+# COMMAND ----------
+
+display(user_df)
