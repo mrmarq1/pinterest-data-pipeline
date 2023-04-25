@@ -113,8 +113,8 @@ display(pin_df)
 schema = StructType([
             StructField('country', StringType()),
             StructField('ind', IntegerType()),
-            StructField('latitude', FloatType()),
-            StructField('longitude', FloatType()),
+            StructField('latitude', StringType()),
+            StructField('longitude', StringType()),
             StructField('timestamp', TimestampType())
         ])
 
@@ -122,6 +122,11 @@ geo_df = dfs['geo'] \
         .selectExpr('CAST(data AS STRING)') \
         .select(from_json('data', schema).alias('data')) \
         .select('data.*')
+
+# COMMAND ----------
+
+geo_df = geo_df.select('ind', 'country', concat_ws(',', geo_df.latitude, geo_df.longitude).alias('coordinates'), 'timestamp')
+geo_df = geo_df.select('ind', 'country', split(col('coordinates'),',').alias('coordinates'), 'timestamp')
 
 # COMMAND ----------
 
