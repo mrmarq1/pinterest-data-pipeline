@@ -106,7 +106,7 @@ pin_df = pin_df.select('ind', 'unique_id', 'title', 'description', 'follower_cou
 
 # COMMAND ----------
 
-display(pin_df)
+pin_df.writeStream.format('delta').outputMode("append").option("checkpointLocation", "/tmp/delta/_checkpoints/").start("/delta/pin_df")
 
 # COMMAND ----------
 
@@ -130,7 +130,7 @@ geo_df = geo_df.select('ind', 'country', split(col('coordinates'),',').alias('co
 
 # COMMAND ----------
 
-display(geo_df)
+geo_df.writeStream.format('delta').outputMode("append").option("checkpointLocation", "/tmp/delta/_checkpoints/").start("/delta/geo_df")
 
 # COMMAND ----------
 
@@ -154,4 +154,19 @@ user_df = user_df.select('ind', concat_ws(' ', user_df.first_name, user_df.last_
 
 # COMMAND ----------
 
-display(user_df)
+user_df.writeStream.format('delta').outputMode("append").option("checkpointLocation", "/tmp/delta/_checkpoints/").start("/delta/user_df")
+
+# COMMAND ----------
+
+delta_pin_df = spark.read.format("delta").load("/delta/pin_df")
+delta_pin_df.show() 
+
+# COMMAND ----------
+
+delta_geo_df = spark.read.format("delta").load("/delta/geo_df")
+delta_geo_df.show() 
+
+# COMMAND ----------
+
+delta_user_df = spark.read.format("delta").load("/delta/user_df")
+delta_user_df.show() 
