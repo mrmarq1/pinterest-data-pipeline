@@ -6,10 +6,10 @@ This project aims to create a Pinterest data pipeline using simulated user data.
 
 Python script created to loop through data and send the related JSON objects to cloud storage based on three distinct Kafka topics.
 
-## Mounted s3 bucket to Databricks
+## Mounting s3 bucket to Databricks
 
 Pulled data into Databricks, cleaned it using the Pandas API and executed a range of SQL-based queries.
 
-## Streamed data into Databricks
+## Streaming data into Databricks
 
 Pulled data into Databricks, cleaned the associated Spark Dataframes and saved transformed datasets in Delta Tables.
