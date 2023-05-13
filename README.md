@@ -22,11 +22,11 @@ This project aims to create a Pinterest data pipeline using simulated user data.
 
 - Function created with indefinite 'while' loop implemented to pull tabular data from source using pymysql and sqlalchemy. Stored outputs in 3 distinct data objects ('pin_data', 'geo_data' and 'user_data') in line with source tables. 
 
-- Passed data objects to a function that serializes them as JSON objects before being transferred to a AWS S3 bucket via a HTTP protocol-enabled AWS Gateway API.
+- Passed data objects to a function that serialized them as JSON objects and transferred them to a AWS S3 bucket via a HTTP protocol-enabled AWS Gateway API.
 
 ### Reviewing S3 status and orchestrating data flow
 
-- Checked data objects successfully stored in S3 bucket under related 'pin', 'geo' and 'user' directories.
+- Checked data objects successfully stored in S3 bucket under related 'pin', 'geo' and 'user' related topics.
 - Set up and configured Airflow with associated Python scripting to pass data from bucket to Databricks.  
 
 ### Mounting s3 bucket to Databricks
