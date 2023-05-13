@@ -22,27 +22,16 @@ This project aims to create a Pinterest data pipeline using simulated user data.
 
 - Function created with indefinite 'while' loop implemented to pull tabular data from source using pymysql and sqlalchemy. Stored outputs in 3 distinct data objects ('pin_data', 'geo_data' and 'user_data') in line with source tables. 
 
-![vsc_get_data_function](https://github.com/mrmarq1/pinterest-data-pipeline/assets/126958930/6048941c-2ab6-412e-9f42-4e0023a3b9c9)
-
-
 - Passed data objects to a function that serialized them as JSON objects and transferred them to a AWS S3 bucket via a HTTP protocol-enabled AWS Gateway API.
-
-![vsc_send_data_function](https://github.com/mrmarq1/pinterest-data-pipeline/assets/126958930/d0d251b4-8969-4ded-b003-95bbaa3da41a)
 
 ### Reviewing S3 status and orchestrating data flow
 
 - Checked data objects successfully stored in S3 bucket under related 'pin', 'geo' and 'user' related topics.
 
-![s3_bucket_topics](https://github.com/mrmarq1/pinterest-data-pipeline/assets/126958930/6ba4c5bd-a738-4f7c-bb2c-c1618ed0871d)
-
-
 ### Batch processing in Databricks
 
 - Mounted S3 bucket to Databricks.
 - Defined function to extract data from s3 bucket and store it in Spark Dataframes.
-
-![db_data_handling](https://github.com/mrmarq1/pinterest-data-pipeline/assets/126958930/61f3d358-8c3f-4802-88e4-172b3db4f8b5)
-
 - Transformed the batch data using the Pandas API and used SQL to query the resulting data.
 
 ### Automate data flow
