@@ -1,15 +1,38 @@
 # Pinterest Data Pipeline
 
-This project aims to create a Pinterest data pipeline using simulated user data. The project will leverage a cloud-based stack to process and manage both batch and streaming data. More specifically, using an AWS EC2 instance, the data will be processed by Kafka running on a MSK cluster before being transferred to a s3 bucket. Said bucket will be mounted to Databricks for subsequent transformation and querying purposes.      
+This project aims to create a Pinterest data pipeline using simulated user data. The project will leverage a Cloud-based stack to process and manage both batch and streaming data. That is, the data will be processed by Kafka running on a MSK cluster in an AWS EC2 instance before being transferred to a S3 bucket. Said bucket will be mounted to Databricks and the related data flow will be orchestrated by Airflow. Within Databricks the batch and streamed data will be transformed and queried before being stored in Delta Tables.      
 
-## Processing simulated data into s3 bucket
+## Project Motivation
 
-Python script created to loop through data and send the related JSON objects to cloud storage based on three distinct Kafka topics.
+- Broadly, to replicate commercial data engineering workflows that increasingly rely on Cloud-based systems and, in turn, gain hands-on experience with related technologies. Moreover, from a data science perspective, to gain insight into the practical considerations of sourcing, processing and storing data when provisioning downstream teams.
 
-## Mounting s3 bucket to Databricks
+- More specifically, Pinterest user data is a suitable fit for batch and streamed data processing. Furthermore, said data contains a mixture of data types and presents cleaning challenges for the transformation phase. Lastly, if extending the project at later point, the tabular outputs are congruent with various algorithms, including those for NLP tasks.  
 
-Pulled data into Databricks, cleaned it using the Pandas API and executed a range of SQL-based queries.
+## Learning Points
 
-## Streaming data into Databricks
+- How to set up and configure tools in an EC2 instance to allow for the transfer of data to a S3 bucket via an AWS Gateway API.
+- What the use cases are for Spark's Pandas API.
+- How Databricks works with AWS and the functionalities it provides.
+- What Delta Tables are and their merits vis-a-vis traditional storage solutions.
+- What some of the practical challenges are for Data Engineering and how they may relate to Data Science tasks. 
 
-Pulled data into Databricks, cleaned the associated Spark Dataframes and saved transformed datasets in Delta Tables.
+## Project Breakdown
+
+### Processing simulated data into s3 bucket
+
+- Function created with indefinite 'while' loop implemented to pull tabular data from source using pymysql and sqlalchemy. Stored outputs in 3 distinct data objects ('pin_data', 'geo_data' and 'user_data') in line with source tables. 
+
+- Passed data objects to a function that serializes them as JSON objects before being transferred to a AWS S3 bucket via a HTTP protocol-enabled AWS Gateway API.
+
+### Reviewing S3 status and orchestrating data flow
+
+- Checked data objects successfully stored in S3 bucket under related 'pin', 'geo' and 'user' directories.
+- Set up and configured Airflow with associated Python scripting to pass data from bucket to Databricks.  
+
+### Mounting s3 bucket to Databricks
+
+- Pulled data into Databricks, transformed the batch data using the Pandas API and used SQL to query the resulting data.
+
+### Streaming data into Databricks
+
+- Transformed the streamed data using PySpark (as Pandas API incompatible), queried it once again using SQL and stored resulting data in Delta Tables. 
