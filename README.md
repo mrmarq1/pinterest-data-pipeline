@@ -34,7 +34,7 @@ This project aims to create a Pinterest data pipeline using simulated user data.
 - Defined function to extract data from s3 bucket and store it in Spark Dataframes.
 - Transformed the batch data using the Pandas API and used SQL to query the resulting data.
 
-### Automate data flow
+### Automating the data flow
 - Set up and configured Airflow with associated Python scripting (DAG) to pass data from bucket to Databricks.
 
 ### Streaming data into Databricks
