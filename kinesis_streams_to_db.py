@@ -73,9 +73,11 @@ pin_df = pin_df.withColumn('description',
    .otherwise(pin_df.description))
 
 pin_df = pin_df.withColumn('follower_count', 
-    when(pin_df.follower_count.contains('User Info Error'),regexp_replace(pin_df.follower_count,'User Info Error','None')) \
-   .when(pin_df.follower_count.contains('k'),regexp_replace(pin_df.follower_count,'k','000')) \
+   when(pin_df.follower_count.contains('k'),regexp_replace(pin_df.follower_count,'k','000')) \
+   .when(pin_df.follower_count.contains('M'),regexp_replace(pin_df.follower_count,'M','000000')) \
    .otherwise(pin_df.follower_count))
+
+pin_df = pin_df.where(pin_df.follower_count!='User Info Error')
 
 pin_df = pin_df.withColumn('follower_count', pin_df.follower_count.cast('int'))
 
