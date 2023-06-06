@@ -229,7 +229,7 @@ ps.sql('''
 
 ps.sql('''      
       WITH 
-      cte1 AS
+      follower_cnt_age_post_yr AS
       (SELECT 
           (CASE
             WHEN u.age BETWEEN 18 AND 24 THEN '18-24'
@@ -245,23 +245,23 @@ ps.sql('''
       ON g.ind = p.ind
       WHERE YEAR(g.timestamp) BETWEEN 2015 AND 2020
       ORDER BY age_group, post_year),
-      cte2 AS 
+      row_numbered AS 
       (SELECT
           *,
           ROW_NUMBER() OVER(PARTITION BY age_group, post_year ORDER BY follower_count) AS row_no      
-      FROM cte1
+      FROM follower_cnt_age_post_yr
       ORDER BY age_group, post_year),
-      cte3 AS
+      max_rows_by_age_yr AS
       (SELECT
         *,
         MAX(row_no) OVER(PARTITION BY age_group, post_year) AS max_row_no
-      FROM cte2)
+      FROM row_numbered)
 
       SELECT
         age_group, 
         post_year, 
         follower_count AS median_follower_count
-      FROM cte3
+      FROM max_rows_by_age_yr
       WHERE row_no = ROUND(max_row_no/2)
       ORDER BY post_year
 ''')
